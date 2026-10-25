@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TOPS Maths Test</title>
+<script>window.MathJax={tex:{inlineMath:[['$','$']],displayMath:[['\\[','\\]']]},svg:{fontCache:'global'},startup:{typeset:false}};</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg-full.js"></script>
+<style>
+html{-webkit-text-size-adjust:100%}
+:root{--bg:#f4f5f8;--card:#fff;--ink:#1a1d24;--mute:#646a78;--line:#dfe2ea;--acc:#1f4fa3;--acc2:#e8eefa;--onacc:#fff;--ok:#1d7a46;--bad:#b3261e;--warn:#a15c00;--warnb:#fff1dc}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12141a;--card:#1b1e26;--ink:#e8eaf0;--mute:#9aa1b1;--line:#2d3240;--acc:#8fb0ff;--acc2:#1f2a44;--onacc:#0d1220;--ok:#6fd39a;--bad:#ff8a80;--warn:#ffb85c;--warnb:#3a2a12;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#12141a;--card:#1b1e26;--ink:#e8eaf0;--mute:#9aa1b1;--line:#2d3240;--acc:#8fb0ff;--acc2:#1f2a44;--onacc:#0d1220;--ok:#6fd39a;--bad:#ff8a80;--warn:#ffb85c;--warnb:#3a2a12;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:820px;margin:0 auto;padding-block:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--card)}
+header.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border-bottom:1px solid var(--line)}
+header.bar .wrap{display:flex;align-items:center;gap:12px;padding-block:10px}
+.brand{font-weight:700;letter-spacing:.02em}
+.who{color:var(--mute);font-size:14px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timer{font:600 20px/1 ui-monospace,Menlo,monospace;padding:6px 10px;border-radius:8px;background:var(--acc2);color:var(--acc)}
+.timer.low{background:var(--warnb);color:var(--warn)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0}
+h1{font-size:24px;margin:4px 0 6px}
+.sub{color:var(--mute);margin:0 0 14px}
+label.f{display:block;font-size:14px;color:var(--mute);margin:12px 0 4px}
+input[type=text]{width:100%;font-size:17px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+input[type=text]:focus{outline:2px solid var(--acc);border-color:var(--acc)}
+button{font:600 16px system-ui,sans-serif;padding:11px 18px;border-radius:9px;border:0;background:var(--acc);color:var(--onacc);cursor:pointer}
+button:focus-visible,.opt:focus-within{outline:2px solid var(--acc);outline-offset:2px}
+button.ghost{background:var(--card);color:var(--acc);border:1px solid var(--acc)}
+button:disabled{opacity:.45;cursor:default}
+ul.rules{margin:8px 0 0;padding-left:20px;color:var(--ink)}
+ul.rules li{margin:3px 0}
+.qhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:8px}
+.qno{font-weight:700;color:var(--acc)}
+.tag{font-size:12px;color:var(--mute);border:1px solid var(--line);border-radius:20px;padding:2px 9px;white-space:nowrap}
+.qtext{margin:0 0 12px;overflow-x:auto}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin:6px 0;cursor:pointer}
+.opt input{margin-top:5px;width:18px;height:18px;flex:none}
+.opt.on{border-color:var(--acc);background:var(--acc2)}
+.opt b{flex:none}
+.ans{max-width:220px}
+.hint{font-size:13px;color:var(--mute);margin-top:6px}
+.card.done{border-left:4px solid var(--acc)}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:20px 0 40px}
+.big{font-size:44px;font-weight:700;color:var(--acc);line-height:1}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0}
+.stat{background:var(--bg);border-radius:10px;padding:10px;text-align:center}
+.stat div:first-child{font-size:22px;font-weight:700}
+.stat div:last-child{font-size:12px;color:var(--mute)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line)}
+th{color:var(--mute);font-weight:600}
+td.r{text-align:right}
+.ok{color:var(--ok);font-weight:700}.bad{color:var(--bad);font-weight:700}.na{color:var(--mute)}
+.btns{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px}
+.hidden{display:none}
+.confirm{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.rec{white-space:pre-wrap;font:13px/1.5 ui-monospace,Menlo,monospace;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;user-select:all;overflow-x:auto}
+.qtext mjx-container[display="true"]{overflow-x:auto;overflow-y:hidden}
+@media (max-width:560px){.stats{grid-template-columns:repeat(2,1fr)}.timer{font-size:17px}}
+</style>
+
+</head><body>
+<header class="bar hidden" id="bar"><div class="wrap"><span class="brand">ALLEN · TOPS Maths</span><span class="who" id="who"></span><span class="timer" id="timer">60:00</span></div></header>
+
+<main class="wrap">
+<section id="start" class="card">
+  <h1>Maths Interaction Test</h1>
+  <p class="sub">Quadratic Equations · Polynomials · Sequences &amp; Series · Trigonometry</p>
+  <ul class="rules">
+    <li>15 questions, 60 minutes. The test submits itself when time is up.</li>
+    <li>Numerical questions: type an integer (fractions like 7/3 are also accepted). +4 if correct, 0 otherwise.</li>
+    <li>Multiple-correct questions: tick every correct option. +4 if all correct; partial marks if only correct options are ticked; −2 if any wrong option is ticked.</li>
+    <li>Your answers save automatically as you go. Work on paper and keep your camera on.</li>
+  </ul>
+  <label class="f" for="nm">Your full name</label>
+  <input type="text" id="nm" autocomplete="name" placeholder="e.g. Aarav Sharma">
+  <label class="f" for="fn">Form number / batch (optional)</label>
+  <input type="text" id="fn" placeholder="e.g. TOPS-A1">
+  <div class="btns"><button id="go" disabled>Start test</button><span class="hint" id="load">Loading questions…</span></div>
+</section>
+
+<section id="test" class="hidden"></section>
+<div id="foot" class="foot hidden"><span class="who" id="cnt"></span><div class="confirm"><span id="ask" class="hidden"></span><button id="sub">Submit test</button><button class="ghost hidden" id="no">Keep working</button></div></div>
+
+<section id="res" class="hidden"></section>
+</main>
+
+
+<script>
+const API = "https://script.google.com/macros/s/AKfycbxPQJMJVGrRsU6W63YpYRAqO1ilaRrBm9HtV2aaqpCex41wIiTy6054kirsslJriDbYvg/exec";
+let Q = [], DURATION = 3600, ROUND = "";
+const L="ABCD"; let KEY="mi-live";
+function call(p){return fetch(API,{method:"POST",body:JSON.stringify(p)}).then(r=>r.json()).then(j=>{if(j&&j.error)throw new Error(j.error);return j})}
+let st={sid:"",name:"",form:"",started:0,ans:{},submitted:false,result:null};
+function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&s.started)st=s}catch(e){}}
+const $=id=>document.getElementById(id);
+function math(el,n=0){if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise([el]).catch(()=>{});else if(n<200)setTimeout(()=>math(el,n+1),150)}
+function left(){return Math.max(0,DURATION-Math.floor((Date.now()-st.started)/1000))}
+function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+":"+String(s%60).padStart(2,'0')}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+// --- sending to the scoreboard
+let pending=false,busy=false,timer=null;
+function payload(submit){return {sid:st.sid,name:st.name,form:st.form,started:st.started,ans:st.ans,left:left(),submit:!!submit}}
+function setNet(t,bad){const n=$('net');if(n){n.textContent=t;n.style.color=bad?'var(--bad)':'var(--mute)'}}
+function push(){if(st.submitted)return;if(busy){pending=true;return}busy=true;pending=false;setNet('Saving…');
+  call(payload(false)).then(()=>{busy=false;setNet('Saved');if(pending)push()})
+    .catch(()=>{busy=false;setNet('Not saved — check internet',true);setTimeout(push,5000)})}
+function soon(){clearTimeout(timer);timer=setTimeout(push,1200)}
+
+let ready=false;
+$('nm').addEventListener('input',()=>{$('go').disabled=!ready||$('nm').value.trim().length<2});
+$('go').onclick=()=>{st.name=$('nm').value.trim();st.form=$('fn').value.trim();st.started=Date.now();
+  st.sid=Date.now().toString(36)+Math.random().toString(36).slice(2,8);save();openTest();push()};
+
+function openTest(){
+  $('start').classList.add('hidden');$('bar').classList.remove('hidden');
+  $('who').textContent=st.name+(st.form?" · "+st.form:"");
+  const box=$('test');box.classList.remove('hidden');$('foot').classList.remove('hidden');
+  box.innerHTML=Q.map((q,i)=>{
+    const head=`<div class="qhead"><span class="qno">Q${i+1}.</span><span class="tag">${q.t} · ${q.type==='mcq'?'One or more correct':'Numerical'}</span></div><div class="qtext">${q.q}</div>`;
+    const body=q.type==='mcq'
+      ? q.o.map((o,j)=>`<label class="opt" data-q="${i}" data-o="${L[j]}"><input type="checkbox" id="q${i}${L[j]}"><b>(${L[j]})</b><span>${o}</span></label>`).join('')
+      : `<input type="text" class="ans" id="q${i}" data-q="${i}" placeholder="Your answer"><div class="hint">Integer or fraction, e.g. −7 or 7/3</div>`;
+    return `<div class="card" id="c${i}">${head}${body}</div>`}).join('');
+  box.querySelectorAll('input.ans').forEach(inp=>{const i=+inp.dataset.q;inp.value=st.ans[i]||'';
+    inp.addEventListener('input',()=>{st.ans[i]=inp.value.trim();if(!st.ans[i])delete st.ans[i];save();mark();soon()})});
+  box.querySelectorAll('.opt').forEach(lab=>{const i=+lab.dataset.q,o=lab.dataset.o,cb=lab.querySelector('input');
+    cb.checked=(st.ans[i]||'').includes(o);lab.classList.toggle('on',cb.checked);
+    cb.addEventListener('change',()=>{let s=new Set((st.ans[i]||'').split('').filter(Boolean));cb.checked?s.add(o):s.delete(o);
+      st.ans[i]=[...s].sort().join('');if(!st.ans[i])delete st.ans[i];lab.classList.toggle('on',cb.checked);save();mark();soon()})});
+  math(box);mark();tick();window.__t=setInterval(tick,1000);window.__hb=setInterval(push,30000);
+}
+function mark(){let n=0;Q.forEach((q,i)=>{const d=!!st.ans[i];n+=d;$('c'+i).classList.toggle('done',d)});$('cnt').innerHTML=`Answered ${n} of ${Q.length} · <span id="net"></span>`}
+function tick(){const s=left();$('timer').textContent=fmt(s);$('timer').classList.toggle('low',s<=300);if(s<=0&&!st.submitted)submit(true)}
+let armed=false;
+$('sub').onclick=()=>{if(armed){submit(false);return}const n=Object.keys(st.ans).length;armed=true;$('ask').textContent=`Answered ${n} of ${Q.length}. Answers can't be changed after this.`;$('ask').classList.remove('hidden');$('sub').textContent='Yes, submit';$('no').classList.remove('hidden')};
+$('no').onclick=()=>{armed=false;$('ask').classList.add('hidden');$('no').classList.add('hidden');$('sub').textContent='Submit test'};
+
+function submit(auto){
+  if(st.submitting)return;st.submitting=true;clearInterval(window.__t);clearInterval(window.__hb);clearTimeout(timer);
+  st.auto=auto;save();
+  $('test').classList.add('hidden');$('foot').classList.add('hidden');
+  const r=$('res');r.classList.remove('hidden');
+  r.innerHTML=`<div class="card"><h1>${esc(st.name)}</h1><p class="sub">Submitting your answers…</p></div>`;
+  const send=()=>call(payload(true)).then(res=>{st.submitted=true;st.result=res;save();showResult()})
+    .catch(()=>{r.innerHTML=`<div class="card"><h1>${esc(st.name)}</h1><p class="sub" style="color:var(--bad)">Could not reach the server. Check your internet — retrying…</p></div>`;setTimeout(send,4000)});
+  send();
+}
+function showResult(){
+  const res=st.result||{score:0,res:[]};
+  $('start').classList.add('hidden');$('bar').classList.remove('hidden');$('who').textContent=st.name;$('timer').textContent='Done';
+  $('test').classList.add('hidden');$('foot').classList.add('hidden');
+  const g=Q.map((q,i)=>({i,t:q.t,a:st.ans[i]||'',r:res.res[i]||'',m:(res.marks||[])[i]||0}));
+  const c=g.filter(x=>x.r==='✓').length,w=g.filter(x=>x.r==='✗').length,p=g.filter(x=>x.r==='½').length,u=g.filter(x=>!x.r).length;
+  const topics=[...new Set(Q.map(q=>q.t))].map(t=>{const rr=g.filter(x=>x.t===t);return {t,c:rr.filter(x=>x.r==='✓').length,n:rr.length,m:rr.reduce((s,x)=>s+x.m,0)}});
+  const r=$('res');r.classList.remove('hidden');
+  r.innerHTML=`<div class="card"><p class="sub" style="margin:0">${st.auto?'Time is up — submitted automatically.':'Submitted. Your teacher has your result.'}</p>
+   <h1>${esc(st.name)}</h1><div class="big">${res.score}<span style="font-size:20px;color:var(--mute)"> / ${Q.length*4}</span></div>
+   <div class="stats"><div class="stat"><div class="ok">${c}</div><div>Correct</div></div><div class="stat"><div>${p}</div><div>Partial</div></div><div class="stat"><div class="bad">${w}</div><div>Wrong</div></div><div class="stat"><div class="na">${u}</div><div>Not attempted</div></div></div>
+   <table><tr><th>Topic</th><th class="r">Correct</th><th class="r">Marks</th></tr>${topics.map(x=>`<tr><td>${x.t}</td><td class="r">${x.c}/${x.n}</td><td class="r">${x.m}</td></tr>`).join('')}</table></div>
+   <div class="card"><table><tr><th>Q</th><th>Topic</th><th>Your answer</th><th>Result</th><th class="r">Marks</th></tr>
+   ${g.map(x=>`<tr><td>${x.i+1}</td><td>${x.t}</td><td>${x.a?esc(x.a):'<span class="na">—</span>'}</td><td class="${x.r==='✓'?'ok':x.r==='✗'?'bad':''}">${x.r||'–'}</td><td class="r">${x.m}</td></tr>`).join('')}</table></div>`;
+  window.scrollTo(0,0);
+}
+function boot(){
+  fetch(API+"?api=questions").then(r=>r.json()).then(d=>{
+    Q=d.qs;DURATION=d.duration;ROUND=d.round;KEY="mi-live-"+ROUND;ready=true;
+    $('load').textContent='';$('go').disabled=$('nm').value.trim().length<2;
+    load();st.submitting=false;
+    if(st.started){ if(st.submitted) showResult(); else if(left()>0){openTest();push()} else {openTest();submit(true)} }
+  }).catch(()=>{$('load').textContent='Could not load the test. Check your internet — retrying…';setTimeout(boot,4000)});
+}
+boot();
+</script>
+
+</body></html>
