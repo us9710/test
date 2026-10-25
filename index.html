@@ -62,11 +62,11 @@ td.r{text-align:right}
 </style>
 
 </head><body>
-<header class="bar hidden" id="bar"><div class="wrap"><span class="brand">ALLEN · TOPS Maths</span><span class="who" id="who"></span><span class="timer" id="timer">60:00</span></div></header>
+<header class="bar hidden" id="bar"><div class="wrap"><span class="brand">ALLEN · TOPS Maths <span id="tb"></span></span><span class="who" id="who"></span><span class="timer" id="timer">60:00</span></div></header>
 
 <main class="wrap">
 <section id="start" class="card">
-  <h1>Maths Interaction Test</h1>
+  <h1>Maths Interaction Test · <span id="tname">…</span></h1>
   <p class="sub">Quadratic Equations · Polynomials · Sequences &amp; Series · Trigonometry</p>
   <ul class="rules">
     <li>15 questions, 60 minutes. The test submits itself when time is up.</li>
@@ -91,6 +91,7 @@ td.r{text-align:right}
 <script>
 const API = "https://script.google.com/macros/s/AKfycbxPQJMJVGrRsU6W63YpYRAqO1ilaRrBm9HtV2aaqpCex41wIiTy6054kirsslJriDbYvg/exec";
 let Q = [], DURATION = 3600, ROUND = "";
+const TEST = (location.pathname.match(/\/test\/(\d+)\/?/)||[])[1]||"1";
 const L="ABCD"; let KEY="mi-live";
 function call(p){return fetch(API,{method:"POST",body:JSON.stringify(p)}).then(r=>r.json()).then(j=>{if(j&&j.error)throw new Error(j.error);return j})}
 let st={sid:"",name:"",form:"",started:0,ans:{},submitted:false,result:null};
@@ -104,7 +105,7 @@ function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','
 
 // --- sending to the scoreboard
 let pending=false,busy=false,timer=null;
-function payload(submit){return {sid:st.sid,name:st.name,form:st.form,started:st.started,ans:st.ans,left:left(),submit:!!submit}}
+function payload(submit){return {test:TEST,sid:st.sid,name:st.name,form:st.form,started:st.started,ans:st.ans,left:left(),submit:!!submit}}
 function setNet(t,bad){const n=$('net');if(n){n.textContent=t;n.style.color=bad?'var(--bad)':'var(--mute)'}}
 function push(){if(st.submitted)return;if(busy){pending=true;return}busy=true;pending=false;setNet('Saving…');
   call(payload(false)).then(()=>{busy=false;setNet('Saved');if(pending)push()})
@@ -118,7 +119,7 @@ $('go').onclick=()=>{st.name=$('nm').value.trim();st.form=$('fn').value.trim();s
 
 function openTest(){
   $('start').classList.add('hidden');$('bar').classList.remove('hidden');
-  $('who').textContent=st.name+(st.form?" · "+st.form:"");
+  $('who').textContent=st.name+(st.form?" · "+st.form:"");$('tb').textContent='· '+ROUND;
   const box=$('test');box.classList.remove('hidden');$('foot').classList.remove('hidden');
   box.innerHTML=Q.map((q,i)=>{
     const head=`<div class="qhead"><span class="qno">Q${i+1}.</span><span class="tag">${q.t} · ${q.type==='mcq'?'One or more correct':'Numerical'}</span></div><div class="qtext">${q.q}</div>`;
@@ -167,8 +168,9 @@ function showResult(){
   window.scrollTo(0,0);
 }
 function boot(){
-  fetch(API+"?api=questions").then(r=>r.json()).then(d=>{
-    Q=d.qs;DURATION=d.duration;ROUND=d.round;KEY="mi-live-"+ROUND;ready=true;
+  fetch("/test/tests.json?v="+Date.now()).then(r=>r.json()).then(all=>{
+    const d=all[TEST]||all["1"];Q=d.qs;DURATION=d.duration;ROUND=d.name;KEY="mi-live-"+TEST+"-"+ROUND;ready=true;
+    document.title="TOPS Maths "+d.name;$('tname').textContent=d.name;
     $('load').textContent='';$('go').disabled=$('nm').value.trim().length<2;
     load();st.submitting=false;
     if(st.started){ if(st.submitted) showResult(); else if(left()>0){openTest();push()} else {openTest();submit(true)} }
