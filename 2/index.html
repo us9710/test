@@ -102,6 +102,7 @@ const $=id=>document.getElementById(id);
 function math(el,n=0){if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise([el]).catch(()=>{});else if(n<200)setTimeout(()=>math(el,n+1),150)}
 function left(){return Math.max(0,DURATION-Math.floor((Date.now()-st.started)/1000))}
 function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+":"+String(s%60).padStart(2,'0')}
+function tx(s){return String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 
 // --- sending to the scoreboard
@@ -123,9 +124,9 @@ function openTest(){
   $('who').textContent=st.name+(st.form?" · "+st.form:"");$('tb').textContent='· '+ROUND;
   const box=$('test');box.classList.remove('hidden');$('foot').classList.remove('hidden');
   box.innerHTML=Q.map((q,i)=>{
-    const head=`<div class="qhead"><span class="qno">Q${i+1}.</span><span class="tag">${q.t} · ${q.type==='mcq'?'One or more correct':'Numerical'}</span></div><div class="qtext">${q.q}</div>`;
+    const head=`<div class="qhead"><span class="qno">Q${i+1}.</span><span class="tag">${q.t} · ${q.type==='mcq'?'One or more correct':'Numerical'}</span></div><div class="qtext">${tx(q.q)}</div>`;
     const body=q.type==='mcq'
-      ? q.o.map((o,j)=>`<label class="opt" data-q="${i}" data-o="${L[j]}"><input type="checkbox" id="q${i}${L[j]}"><b>(${L[j]})</b><span>${o}</span></label>`).join('')
+      ? q.o.map((o,j)=>`<label class="opt" data-q="${i}" data-o="${L[j]}"><input type="checkbox" id="q${i}${L[j]}"><b>(${L[j]})</b><span>${tx(o)}</span></label>`).join('')
       : `<input type="text" class="ans" id="q${i}" data-q="${i}" placeholder="Your answer"><div class="hint">Integer or fraction, e.g. −7 or 7/3</div>`;
     return `<div class="card" id="c${i}">${head}${body}</div>`}).join('');
   box.querySelectorAll('input.ans').forEach(inp=>{const i=+inp.dataset.q;inp.value=st.ans[i]||'';
