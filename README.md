@@ -10,5 +10,6 @@ Student test pages for online interactions.
 | Test 4 | https://us9710.github.io/test/4 |
 
 - `index.html` (also in `1/`–`4/`): the test page; the folder number picks the test.
+- Teacher preview: add `?preview` to a test link (no timer, nothing recorded).
 - `tests.json`: questions only. Answer keys and grading live in a private Google Apps Script; scores go to a private Google Sheet.
 - To change questions, rebuild with the private project in OneDrive `Class-Work/Interaction/LiveTests` and push the new `tests.json`.
