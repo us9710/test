@@ -91,11 +91,12 @@ td.r{text-align:right}
 <script>
 const API = "https://script.google.com/macros/s/AKfycbxPQJMJVGrRsU6W63YpYRAqO1ilaRrBm9HtV2aaqpCex41wIiTy6054kirsslJriDbYvg/exec";
 let Q = [], DURATION = 3600, ROUND = "";
+const PREVIEW = /[?&]preview\b/.test(location.search);
 const TEST = (location.pathname.match(/\/test\/(\d+)\/?/)||[])[1]||"1";
 const L="ABCD"; let KEY="mi-live";
 function call(p){return fetch(API,{method:"POST",body:JSON.stringify(p)}).then(r=>r.json()).then(j=>{if(j&&j.error)throw new Error(j.error);return j})}
 let st={sid:"",name:"",form:"",started:0,ans:{},submitted:false,result:null};
-function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
+function save(){if(PREVIEW)return;try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
 function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&s.started)st=s}catch(e){}}
 const $=id=>document.getElementById(id);
 function math(el,n=0){if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise([el]).catch(()=>{});else if(n<200)setTimeout(()=>math(el,n+1),150)}
@@ -107,7 +108,7 @@ function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','
 let pending=false,busy=false,timer=null;
 function payload(submit){return {test:TEST,sid:st.sid,name:st.name,form:st.form,started:st.started,ans:st.ans,left:left(),submit:!!submit}}
 function setNet(t,bad){const n=$('net');if(n){n.textContent=t;n.style.color=bad?'var(--bad)':'var(--mute)'}}
-function push(){if(st.submitted)return;if(busy){pending=true;return}busy=true;pending=false;setNet('Saving…');
+function push(){if(st.submitted||PREVIEW)return;if(busy){pending=true;return}busy=true;pending=false;setNet('Saving…');
   call(payload(false)).then(()=>{busy=false;setNet('Saved');if(pending)push()})
     .catch(()=>{busy=false;setNet('Not saved — check internet',true);setTimeout(push,5000)})}
 function soon(){clearTimeout(timer);timer=setTimeout(push,1200)}
@@ -136,7 +137,7 @@ function openTest(){
   math(box);mark();tick();window.__t=setInterval(tick,1000);window.__hb=setInterval(push,30000);
 }
 function mark(){let n=0;Q.forEach((q,i)=>{const d=!!st.ans[i];n+=d;$('c'+i).classList.toggle('done',d)});$('cnt').innerHTML=`Answered ${n} of ${Q.length} · <span id="net"></span>`}
-function tick(){const s=left();$('timer').textContent=fmt(s);$('timer').classList.toggle('low',s<=300);if(s<=0&&!st.submitted)submit(true)}
+function tick(){if(PREVIEW){$('timer').textContent='Preview';return}const s=left();$('timer').textContent=fmt(s);$('timer').classList.toggle('low',s<=300);if(s<=0&&!st.submitted)submit(true)}
 let armed=false;
 $('sub').onclick=()=>{if(armed){submit(false);return}const n=Object.keys(st.ans).length;armed=true;$('ask').textContent=`Answered ${n} of ${Q.length}. Answers can't be changed after this.`;$('ask').classList.remove('hidden');$('sub').textContent='Yes, submit';$('no').classList.remove('hidden')};
 $('no').onclick=()=>{armed=false;$('ask').classList.add('hidden');$('no').classList.add('hidden');$('sub').textContent='Submit test'};
@@ -172,6 +173,7 @@ function boot(){
     const d=all[TEST]||all["1"];Q=d.qs;DURATION=d.duration;ROUND=d.name;KEY="mi-live-"+TEST+"-"+ROUND;ready=true;
     document.title="TOPS Maths "+d.name;$('tname').textContent=d.name;
     $('load').textContent='';$('go').disabled=$('nm').value.trim().length<2;
+    if(PREVIEW){st.name='Preview (not recorded)';st.started=Date.now();openTest();$('foot').classList.add('hidden');return}
     load();st.submitting=false;
     if(st.started){ if(st.submitted) showResult(); else if(left()>0){openTest();push()} else {openTest();submit(true)} }
   }).catch(()=>{$('load').textContent='Could not load the test. Check your internet — retrying…';setTimeout(boot,4000)});
