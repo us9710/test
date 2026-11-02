@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TOPS Maths Test 5</title>
+<title>TOPS Maths Test</title>
 <script>window.MathJax={tex:{inlineMath:[['$','$']],displayMath:[['\\[','\\]']]},svg:{fontCache:'global'},startup:{typeset:false}};</script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg-full.js"></script>
 <style>
@@ -73,7 +73,7 @@ h2.set{font-size:18px;margin:26px 0 4px}
   <h1>Maths Interaction Test · <span id="tname">Test 5</span></h1>
   <p class="sub">Quadratic Equations · Polynomials · Sequences &amp; Series · Trigonometry</p>
   <ul class="rules">
-    <li>15 questions in 3 stages of 5, 60 minutes in all. The test submits itself when time is up.</li>
+    <li>15 questions in 3 stages of 5 (Easy, then Medium, then Tough), 40 minutes in all. The test submits itself when time is up.</li>
     <li>The questions of each stage depend on how you did in the stage before. Later stages can carry more marks per question.</li>
     <li>Within a stage you can change any answer. Once you finish a stage you cannot go back to it.</li>
     <li>Numerical questions: type an integer or a fraction like 7/3. Multiple-correct questions: tick every correct option; partial marks if only correct options are ticked, negative marks if any wrong option is ticked.</li>
@@ -94,7 +94,7 @@ h2.set{font-size:18px;margin:26px 0 4px}
 
 <script>
 const API = "https://script.google.com/macros/s/AKfycbxPQJMJVGrRsU6W63YpYRAqO1ilaRrBm9HtV2aaqpCex41wIiTy6054kirsslJriDbYvg/exec";
-const TEST = "5", DURATION = 3600, NS = 3, PER = 5, KEY = "mi-live-5-adaptive";
+const TEST = (location.pathname.match(/\/test\/(\d+)\/?/)||[])[1]||"5", DURATION = 2400, NS = 3, PER = 5, KEY = "mi-live-"+TEST+"-adaptive";
 const PREVIEW = (location.search.match(/[?&]preview=([^&]+)/) || [])[1] || "";
 const L = "ABCD";
 function call(p){p.mode="adaptive";p.test=TEST;return fetch(API,{method:"POST",body:JSON.stringify(p)}).then(r=>r.json()).then(j=>{if(j&&j.error)throw new Error(j.error);return j})}
@@ -104,7 +104,7 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
 function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&s.started)st=s}catch(e){}}
 const $=id=>document.getElementById(id);
 function math(el,n=0){if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise([el]).catch(()=>{});else if(n<200)setTimeout(()=>math(el,n+1),150)}
-function left(){return Math.max(0,DURATION-Math.floor((Date.now()-st.started)/1000))}
+function left(){return Math.max(0,(st.dur||DURATION)-Math.floor((Date.now()-st.started)/1000))}
 function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+":"+String(s%60).padStart(2,'0')}
 function tx(s){return String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
@@ -128,13 +128,13 @@ $('nm').addEventListener('input',()=>{$('go').disabled=$('nm').value.trim().leng
 $('go').onclick=()=>{$('go').disabled=true;$('load').textContent='Starting…';
   st.name=$('nm').value.trim();st.form=$('fn').value.trim();st.started=Date.now();
   st.sid=Date.now().toString(36)+Math.random().toString(36).slice(2,8);save();
-  const go=()=>call(Object.assign(base(),{start:true})).then(r=>{st.stages=[{qs:r.qs,ans:{}}];save();openTest()})
+  const go=()=>call(Object.assign(base(),{start:true})).then(r=>{if(r.dur)st.dur=r.dur;st.stages=[{qs:r.qs,ans:{}}];save();openTest()})
     .catch(()=>{$('load').textContent='Could not reach the server. Check your internet — retrying…';setTimeout(go,4000)});
   go()};
 
 function openTest(){
   $('start').classList.add('hidden');$('bar').classList.remove('hidden');
-  $('who').textContent=st.name+(st.form?" · "+st.form:"");$('tb').textContent='· Test 5';
+  $('who').textContent=st.name+(st.form?" · "+st.form:"");$('tb').textContent='· Test '+TEST;
   render();clearInterval(window.__t);clearInterval(window.__hb);tick();window.__t=setInterval(tick,1000);window.__hb=setInterval(push,30000);
 }
 function qcard(q,n,id,ans){
@@ -194,15 +194,16 @@ function showResult(){
 }
 // teacher preview: ?preview=KEY shows every stage set, records nothing
 function preview(){
-  $('start').classList.add('hidden');$('bar').classList.remove('hidden');$('who').textContent='Preview (not recorded)';$('timer').textContent='Preview';$('tb').textContent='· Test 5';
+  $('start').classList.add('hidden');$('bar').classList.remove('hidden');$('who').textContent='Preview (not recorded)';$('timer').textContent='Preview';$('tb').textContent='· Test '+TEST;
   call({preview:PREVIEW}).then(d=>{
     const box=$('test');box.classList.remove('hidden');
-    const nm={M1:'Stage 1 (everyone)',M2:'Stage 2 after a weak stage 1',T1:'Stage 2 after a strong stage 1',E1:'Stage 3 after weak, weak',T2:'Stage 3 after one strong, one weak stage',V1:'Stage 3 after strong, strong'};
-    box.innerHTML=`<div class="note">Route: ${d.pass} or more fully correct out of 5 takes the upper route. Marks per level: Easy ×${d.weight.E}, Medium ×${d.weight.M}, Tough ×${d.weight.T}, Very Tough ×${d.weight.V}.</div>`+
+    const nm={E1:'Stage 1 (everyone)',E2:'Stage 2 after a weak stage 1',M1:'Stage 2 after a strong stage 1',M2:'Stage 3 after E2, or after a weak M1',T1:'Stage 3 after a strong M1'};
+    box.innerHTML=`<div class="note">Route: ${d.pass} or more fully correct out of 5 takes the upper route. Marks per level: Easy ×${d.weight.E}, Medium ×${d.weight.M}, Tough ×${d.weight.T}. ${Math.round((d.duration||2400)/60)} minutes. Very Tough questions are asked in person, not online.</div>`+
       Object.keys(d.sets).map(id=>`<h2 class="set">${id} · ${d.sets[id].label} — ${nm[id]||''}</h2>`+d.sets[id].qs.map((q,i)=>qcard(q,i+1,id+i)).join('')).join('');
     math(box)}).catch(e=>{$('test').classList.remove('hidden');$('test').innerHTML=`<div class="card">${esc(e.message)}</div>`});
 }
 function boot(){
+  document.title='TOPS Maths Test '+TEST;$('tname').textContent='Test '+TEST;
   if(PREVIEW){preview();return}
   load();moving=false;
   if(st.started){ if(st.submitted) showResult();
