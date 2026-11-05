@@ -192,6 +192,7 @@ function boot(){
   const req=PREVIEW?{preview:PV||'x'}:{action:'load',sid:st.sid||('new-'+Math.random().toString(36).slice(2))};
   call(req).then(d=>{
     if(d.closed){closed(d.name);return}
+    if(!d.qs&&!d.submitted){$('tname').textContent=TEST;$('load').innerHTML='The test server has not been updated for this test yet.<br>Teacher: open the Apps Script, paste the new Code.gs, then Deploy &rarr; Manage deployments &rarr; Edit &rarr; New version.';return}
     if(d.submitted){st.result=d;st.submitted=true;save();Q=[];showResult();return}
     Q=d.qs;DURATION=d.duration||3600;NAME=d.name;ready=true;
     document.title="TOAS Maths "+TEST;$('tname').textContent=TEST;$('mins').textContent=Math.round(DURATION/60);
