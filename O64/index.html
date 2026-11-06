@@ -112,7 +112,7 @@ details.sol summary{cursor:pointer;font-weight:600;color:var(--acc)}
     <li>Section 2, one or more correct (Q7–12): +4 if all correct options are ticked; +1 for each correct option if no wrong option is ticked; −1 if any wrong option is ticked.</li>
     <li>Section 3, numerical (Q13–18): +3 if correct, 0 otherwise. Give decimals to 2 places (e.g. 2.58); fractions like 7/3 are also accepted.</li>
     <li>Unanswered questions get 0. Your answers save as you go, and you will see your score when you submit.</li>
-    <li>Once your teacher opens the review, this same link shows the answers, full solutions and the kind of mistake on each question, and lets you download your report.</li>
+    <li>After you submit, this page shows the answers, full solutions and the kind of mistake on each question, and lets you download your report.</li>
   </ul>
   <label class="f" for="nm">Your full name</label>
   <input type="text" id="nm" autocomplete="name" placeholder="e.g. Aarav Sharma">
@@ -216,7 +216,7 @@ function showResult(){
    <div class="stats"><div class="stat"><div class="ok">${c}</div><div>Correct</div></div><div class="stat"><div>${p}</div><div>Partly correct</div></div><div class="stat"><div class="bad">${w}</div><div>Wrong</div></div><div class="stat"><div class="na">${u}</div><div>Not attempted</div></div></div>
    <table><tr><th>Section</th><th class="r">Correct</th><th class="r">Marks</th></tr>${secs.map(x=>`<tr><td>${SEC[x.t]}</td><td class="r">${x.c}/${x.n}</td><td class="r">${x.m} / ${x.max}</td></tr>`).join('')}</table>
    <div class="btns noprint"><button id="dl">Download report (PDF)</button><button class="ghost" id="rf">Refresh</button></div>
-   <p class="hint noprint">${RQ?'Answers and solutions are open below. Tag why each question went wrong, save, then download your report.':'Answers and solutions will appear here once your teacher opens the review. Open this same link again later, on this device.'}</p></div>`;
+   <p class="hint noprint">${RQ?'Answers and solutions are open below. Tag why each question went wrong, save, then download your report.':'Answers and solutions will appear here. Press Refresh if they do not show.'}</p></div>`;
   if(Object.keys(kinds).length) h+=`<div class="card"><h2>Kinds of mistakes</h2><table><tr><th>Mistake</th><th class="r">Questions</th></tr>${Object.keys(kinds).sort((a,b)=>kinds[b]-kinds[a]).map(k=>`<tr><td>${esc(k)}<div class="hint">${KINDTIP[k]||''}</div></td><td class="r">${kinds[k]}</td></tr>`).join('')}</table></div>`;
   if(Object.keys(chs).length) h+=`<div class="card"><h2>Chapter-wise</h2><table><tr><th>Chapter</th><th>Questions</th><th class="r">Marks</th></tr>${Object.keys(chs).sort((a,b)=>chs[a].m/chs[a].max-chs[b].m/chs[b].max).map(k=>{const o=chs[k];return `<tr><td>${esc(k)}</td><td>${o.q.map(x=>`Q${x.i+1} <span class="${x.r==='✓'?'ok':x.r==='✗'?'bad':'na'}">${x.r||'–'}</span>`).join(', ')}</td><td class="r">${o.m} / ${o.max}</td></tr>`}).join('')}</table></div>`;
   h+=`<h2 class="sec">Question by question</h2>`;
