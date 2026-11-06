@@ -69,6 +69,34 @@ td.r{text-align:right}
 .pal a.on{background:var(--acc);color:var(--onacc);border-color:var(--acc)}
 .qtext ol.sub{margin:6px 0;padding-left:22px}
 button.clr{background:none;color:var(--mute);border:0;padding:4px 0;font-size:13px;font-weight:500;text-decoration:underline}
+h2{font-size:18px;margin:0 0 8px}
+.bdg{font-size:13px;font-weight:700;border-radius:20px;padding:2px 10px}
+.okb{background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ok)}
+.badb{background:color-mix(in srgb,var(--bad) 15%,transparent);color:var(--bad)}
+.pb{background:var(--warnb);color:var(--warn)}
+.nab{background:var(--bg);color:var(--mute)}
+.rrow{display:flex;justify-content:space-between;align-items:center;margin:0 0 10px}
+.mk{font-size:13px;color:var(--mute)}
+.card.good{border-left:4px solid var(--ok)}.card.badc{border-left:4px solid var(--bad)}.card.part{border-left:4px solid var(--warn)}
+.opt.rv{cursor:default}.opt.rv em{font-style:normal;font-size:12px;font-weight:700;flex:none;margin-left:6px}
+.opt.cor{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 9%,transparent)}
+.opt.mine{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,transparent)}
+.ansl{margin:8px 0}
+.kind{margin:10px 0 0;font-size:15px}
+.why{margin-top:8px}.why select,.why input{width:100%;font-size:16px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);margin-top:6px}
+details.sol{margin-top:12px;border-top:1px dashed var(--line);padding-top:8px}
+details.sol summary{cursor:pointer;font-weight:600;color:var(--acc)}
+.pr{margin:2px 0 8px}
+@media print{
+ :root{--bg:#fff;--card:#fff;--ink:#000;--mute:#555;--line:#ccc;--acc:#1f4fa3;--acc2:#e8eefa;--ok:#1d7a46;--bad:#b3261e;--warn:#a15c00;--warnb:#fff1dc}
+ body{background:#fff;font-size:13px}header.bar,.noprint,body::before{display:none!important}
+ .card{break-inside:avoid;border:1px solid #ccc;margin:8px 0;padding:12px}
+ .why select{appearance:none;-webkit-appearance:none;border:0;padding:0;font-weight:700}.why input{border:0;padding:0}
+ details.sol summary{list-style:none}
+ .why.empty,.why input.empty{display:none}
+ h2.sec{break-after:avoid}
+ .wrap{max-width:none;padding:0}
+}
 </style>
 
 </head><body>
@@ -84,6 +112,7 @@ button.clr{background:none;color:var(--mute);border:0;padding:4px 0;font-size:13
     <li>Section 2, one or more correct (Q7–12): +4 if all correct options are ticked; +1 for each correct option if no wrong option is ticked; −1 if any wrong option is ticked.</li>
     <li>Section 3, numerical (Q13–18): +3 if correct, 0 otherwise. Give decimals to 2 places (e.g. 2.58); fractions like 7/3 are also accepted.</li>
     <li>Unanswered questions get 0. Your answers save as you go, and you will see your score when you submit.</li>
+    <li>Once your teacher opens the review, this same link shows the answers, full solutions and the kind of mistake on each question, and lets you download your report.</li>
   </ul>
   <label class="f" for="nm">Your full name</label>
   <input type="text" id="nm" autocomplete="name" placeholder="e.g. Aarav Sharma">
@@ -168,23 +197,53 @@ function submit(auto){
     .catch(()=>{r.innerHTML=`<div class="card"><h1>${esc(st.name)}</h1><p class="sub" style="color:var(--bad)">Could not reach the server. Check your internet — retrying…</p></div>`;setTimeout(send,4000)});
   send();
 }
+const KINDTIP={'Not attempted':'Left blank.','Wrong option':'Picked an incorrect option.','Ticked only wrong options':'None of the ticked options was correct.','Mixed a wrong option with correct ones':'Some ticked options were right, but at least one was wrong (−1).','Partly correct: missed a correct option':'Every ticked option was right, but a correct option was left out.','Wrong value':'The value is far from the answer.','Close: rounding or calculation slip':'Within 5% of the answer: check the arithmetic or rounding.','Sign error':'Right size, wrong sign.','Answer not in a valid number format':'The answer could not be read as a number.'};
+function badge(r){return r==='✓'?'<span class="bdg okb">✓ Correct</span>':r==='½'?'<span class="bdg pb">½ Partly correct</span>':r==='✗'?'<span class="bdg badb">✗ Wrong</span>':'<span class="bdg nab">Not attempted</span>'}
 function showResult(){
   const res=st.result||{score:0,res:[]};
   $('start').classList.add('hidden');$('bar').classList.remove('hidden');$('who').textContent=st.name||'';$('timer').textContent='Done';$('tb').textContent='· '+TEST;
   $('test').classList.add('hidden');$('foot').classList.add('hidden');
-  const n=(res.res||[]).length||18;
-  const g=[...Array(n)].map((_,i)=>({i,ty:Q[i]?Q[i].type:(i<6?'scq':i<12?'mcq':'num'),a:st.ans[i]||'',r:res.res[i]||'',m:(res.marks||[])[i]||0}));
+  const n=(res.res||[]).length||18, info=res.info||[], RQ=res.review&&res.qs?res.qs:null, A=res.ans||st.ans||{};
+  const g=[...Array(n)].map((_,i)=>({i,ty:(info[i]&&info[i].type)||(Q[i]?Q[i].type:(i<6?'scq':i<12?'mcq':'num')),a:A[i]||'',r:res.res[i]||'',m:(res.marks||[])[i]||0,ch:(info[i]&&info[i].ch)||'',lvl:(info[i]&&info[i].lvl)||'',kind:(info[i]&&info[i].kind)||''}));
   const c=g.filter(x=>x.r==='✓').length,w=g.filter(x=>x.r==='✗').length,p=g.filter(x=>x.r==='½').length,u=g.filter(x=>!x.r).length;
   const secs=['scq','mcq','num'].map(t=>{const rr=g.filter(x=>x.ty===t);return {t,c:rr.filter(x=>x.r==='✓').length,n:rr.length,m:rr.reduce((s,x)=>s+x.m,0),max:rr.length*(t==='num'?3:4)}});
-  const r=$('res');r.classList.remove('hidden');
-  r.innerHTML=`<div class="card"><p class="sub" style="margin:0">${st.auto?'Time is up — submitted automatically.':'Submitted. Your teacher has your result.'}</p>
-   <h1>${esc(st.name||'')}</h1><div class="big">${res.score}<span style="font-size:20px;color:var(--mute)"> / ${res.max||66}</span></div>
-   <div class="stats"><div class="stat"><div class="ok">${c}</div><div>Correct</div></div><div class="stat"><div>${p}</div><div>Partial</div></div><div class="stat"><div class="bad">${w}</div><div>Wrong</div></div><div class="stat"><div class="na">${u}</div><div>Not attempted</div></div></div>
-   <table><tr><th>Section</th><th class="r">Correct</th><th class="r">Marks</th></tr>${secs.map(x=>`<tr><td>${SEC[x.t]}</td><td class="r">${x.c}/${x.n}</td><td class="r">${x.m} / ${x.max}</td></tr>`).join('')}</table></div>
-   <div class="card"><table><tr><th>Q</th><th>Type</th><th>Your answer</th><th>Result</th><th class="r">Marks</th></tr>
-   ${g.map(x=>`<tr><td>${x.i+1}</td><td>${SEC[x.ty]}</td><td>${x.a?esc(x.a):'<span class="na">—</span>'}</td><td class="${x.r==='✓'?'ok':x.r==='✗'?'bad':''}">${x.r||'–'}</td><td class="r">${x.m}</td></tr>`).join('')}</table></div>`;
-  window.scrollTo(0,0);
+  const chs={};g.forEach(x=>{if(!x.ch)return;const o=chs[x.ch]||(chs[x.ch]={q:[],m:0,max:0});o.q.push(x);o.m+=x.m;o.max+=x.ty==='num'?3:4});
+  const kinds={};g.forEach(x=>{if(x.kind&&x.kind!=='Correct')kinds[x.kind]=(kinds[x.kind]||0)+1});
+  const when=new Date().toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});
+  const tagged=res.tagged||{}, reasons=res.reasons||[];
+  let h=`<div class="card"><p class="sub" style="margin:0">${st.auto?'Time is up — submitted automatically.':'Submitted. Your teacher has your result.'}</p>
+   <h1>${esc(st.name||'')}</h1><p class="sub pr">TOAS Maths ${TEST} · report · ${when}</p><div class="big">${res.score}<span style="font-size:20px;color:var(--mute)"> / ${res.max||66}</span></div>
+   <div class="stats"><div class="stat"><div class="ok">${c}</div><div>Correct</div></div><div class="stat"><div>${p}</div><div>Partly correct</div></div><div class="stat"><div class="bad">${w}</div><div>Wrong</div></div><div class="stat"><div class="na">${u}</div><div>Not attempted</div></div></div>
+   <table><tr><th>Section</th><th class="r">Correct</th><th class="r">Marks</th></tr>${secs.map(x=>`<tr><td>${SEC[x.t]}</td><td class="r">${x.c}/${x.n}</td><td class="r">${x.m} / ${x.max}</td></tr>`).join('')}</table>
+   <div class="btns noprint"><button id="dl">Download report (PDF)</button><button class="ghost" id="rf">Refresh</button></div>
+   <p class="hint noprint">${RQ?'Answers and solutions are open below. Tag why each question went wrong, save, then download your report.':'Answers and solutions will appear here once your teacher opens the review. Open this same link again later, on this device.'}</p></div>`;
+  if(Object.keys(kinds).length) h+=`<div class="card"><h2>Kinds of mistakes</h2><table><tr><th>Mistake</th><th class="r">Questions</th></tr>${Object.keys(kinds).sort((a,b)=>kinds[b]-kinds[a]).map(k=>`<tr><td>${esc(k)}<div class="hint">${KINDTIP[k]||''}</div></td><td class="r">${kinds[k]}</td></tr>`).join('')}</table></div>`;
+  if(Object.keys(chs).length) h+=`<div class="card"><h2>Chapter-wise</h2><table><tr><th>Chapter</th><th>Questions</th><th class="r">Marks</th></tr>${Object.keys(chs).sort((a,b)=>chs[a].m/chs[a].max-chs[b].m/chs[b].max).map(k=>{const o=chs[k];return `<tr><td>${esc(k)}</td><td>${o.q.map(x=>`Q${x.i+1} <span class="${x.r==='✓'?'ok':x.r==='✗'?'bad':'na'}">${x.r||'–'}</span>`).join(', ')}</td><td class="r">${o.m} / ${o.max}</td></tr>`}).join('')}</table></div>`;
+  h+=`<h2 class="sec">Question by question</h2>`;
+  h+=g.map(x=>{
+    const q=RQ?RQ[x.i]:null, wrong=x.r!=='✓';
+    let b=`<div class="qhead"><span class="qno">Q${x.i+1}.</span><span class="tag">${esc(x.ch||SEC[x.ty])}${x.lvl?' · '+esc(x.lvl):''}</span></div><div class="rrow">${badge(x.r)}<span class="mk">${x.m>0?'+':''}${x.m} marks</span></div>`;
+    if(q){
+      b+=`<div class="qtext">${q.q}</div>`;
+      if(q.type==='num') b+=`<p class="ansl">Your answer: <b>${x.a?esc(x.a):'—'}</b> · Correct answer: <b class="ok">${esc(String(q.key).replace('or',' to '))}</b></p>`;
+      else b+=q.o.map((o,j)=>{const L1=L[j],ok=q.key.includes(L1),me=String(x.a).toUpperCase().includes(L1);return `<div class="opt rv${ok?' cor':''}${me&&!ok?' mine':''}"><b>(${L1})</b><span>${o}</span>${ok?'<em class="ok">correct</em>':''}${me?'<em>your pick</em>':''}</div>`}).join('');
+    } else b+=`<p class="ansl">Your answer: <b>${x.a?esc(x.a):'—'}</b></p>`;
+    if(wrong&&x.kind) b+=`<p class="kind"><b>What went wrong:</b> ${esc(x.kind)}${KINDTIP[x.kind]?` <span class="hint">— ${KINDTIP[x.kind]}</span>`:''}</p>`;
+    if(q&&wrong){const t=tagged[x.i]||{};b+=`<div class="why"><label class="f" for="why${x.i}">Why did you lose marks here?</label><select id="why${x.i}" data-q="${x.i}"><option value="">Choose a reason…</option>${reasons.map(r=>`<option${t.reason===r?' selected':''}>${esc(r)}</option>`).join('')}</select><input type="text" id="note${x.i}" placeholder="Note to yourself (optional)" value="${esc(t.note||'')}"></div>`}
+    if(q&&q.sol) b+=`<details class="sol"><summary>Solution</summary><div class="qtext">${q.sol}</div></details>`;
+    return `<div class="card${x.r==='✓'?' good':x.r==='½'?' part':x.r==='✗'?' badc':''}">${b}</div>`}).join('');
+  if(RQ&&g.some(x=>x.r!=='✓')) h+=`<div class="card noprint"><div class="btns" style="margin:0"><button id="sv">Save my mistake notes</button><span class="hint" id="svs"></span></div></div>`;
+  const r=$('res');r.classList.remove('hidden');r.innerHTML=h;
+  $('dl').onclick=()=>{prep();setTimeout(()=>window.print(),300)};
+  $('rf').onclick=()=>{$('rf').disabled=true;call({action:'load',sid:st.sid}).then(d=>{if(d.submitted){st.result=d;save();showResult()}}).catch(()=>{$('rf').disabled=false})};
+  if($('sv'))$('sv').onclick=()=>{const tags={};g.forEach(x=>{const s=$('why'+x.i);if(s)tags[x.i]={reason:s.value,note:$('note'+x.i).value.trim()}});
+    $('sv').disabled=true;$('svs').textContent='Saving…';
+    call({action:'reflect',sid:st.sid,tags}).then(d=>{$('sv').disabled=false;$('svs').textContent='Saved. Your teacher can see these notes.';
+      st.result.tagged=tags;save()}).catch(e=>{$('sv').disabled=false;$('svs').textContent='Not saved: '+e.message})};
+  math(r);window.scrollTo(0,0);
 }
+function prep(){document.querySelectorAll('details.sol').forEach(d=>d.open=true);document.querySelectorAll('.why').forEach(w=>{const s=w.querySelector('select'),n=w.querySelector('input');w.classList.toggle('empty',!s.value&&!n.value.trim());n.classList.toggle('empty',!n.value.trim())})}
+window.addEventListener('beforeprint',prep);
 function closed(name){$('tname').textContent=name||TEST;$('load').textContent='This test is not open yet. Ask your teacher.';$('go').disabled=true;ready=false}
 function boot(){
   if(!TEST){$('tname').textContent='?';$('load').textContent='Open the link your teacher sent (it ends in /O58, /O59 …).';return}
