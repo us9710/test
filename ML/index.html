@@ -24,8 +24,7 @@ header{padding:20px 0 8px}
 h1{font:700 26px/1.15 var(--display);margin:6px 0 4px;text-wrap:balance}
 .sub{color:var(--muted);margin:0}
 .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
-.who{display:grid;gap:10px;margin:12px 0;grid-template-columns:1fr 1fr}
-@media (max-width:480px){.who{grid-template-columns:1fr}}
+.who{display:grid;gap:10px;margin:12px 0}
 label.f{display:block;font:600 13px var(--display);letter-spacing:.03em;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
 textarea,input[type=text]{width:100%;font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:9px 10px}
 .how{margin:14px 0;color:var(--muted);font-size:14px}
@@ -79,11 +78,10 @@ button:focus-visible,textarea:focus-visible,input:focus-visible{outline:2px soli
 </header>
 <div class="notice" id="pv" hidden>Teacher preview: nothing is sent.</div>
 <div class="card who">
-  <div><label class="f" for="name">Your name</label><input type="text" id="name" autocomplete="name" placeholder="As on your admit card"></div>
-  <div><label class="f" for="formno">Form number</label><input type="text" id="formno" inputmode="numeric" placeholder="10 digits"></div>
+  <div><label class="f" for="name">Your name</label><input type="text" id="name" autocomplete="name" placeholder="Your full name"></div>
 </div>
 <div class="how"><b>How to fill this</b><ol>
-  <li>For every question, tap <b>Right</b>, <b>Wrong</b> or <b>Left</b>.</li>
+  <li>Every question starts as <b>Right</b>. Change only the ones you got <b>Wrong</b> or <b>Left</b>.</li>
   <li>For Wrong or Left, pick what went wrong. One line on what happened helps most.</li>
   <li>Add clear photos of your rough work for both papers, then press Send.</li></ol></div>
 <div id="qs"></div>
@@ -109,8 +107,8 @@ const REASONS=['Did not know the concept','Wrong approach','Calculation slip','M
 const KEY='ml-'+TID;
 const $=s=>document.querySelector(s);
 let state={}, photos=[];
-function save(){try{localStorage.setItem(KEY,JSON.stringify({state,name:$('#name').value,form:$('#formno').value,overall:$('#overall').value}))}catch(e){}}
-function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'null');if(d){state=d.state||{};$('#name').value=d.name||'';$('#formno').value=d.form||'';$('#overall').value=d.overall||''}}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({state,name:$('#name').value,overall:$('#overall').value}))}catch(e){}}
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'null');if(d){state=d.state||{};$('#name').value=d.name||'';$('#overall').value=d.overall||''}}catch(e){}}
 const L={'P1-I':'Paper 1 · Section I','P1-II':'Paper 1 · Section II (Numerical)','P2-I':'Paper 2 · Section I','P2-II':'Paper 2 · Section II (Numerical)'};
 const label=q=>q.paper+(q.sec==='II'?' Num':'')+' Q'+q.n;
 function render(){
@@ -118,7 +116,7 @@ function render(){
   $('#kicker').textContent=T.title; if(PREVIEW)$('#pv').hidden=false;
   let h='',last='',lt='';
   T.qs.forEach(q=>{
-    state[q.id]=state[q.id]||{status:null,reasons:[],note:''};
+    state[q.id]=state[q.id]||{status:'right',reasons:[],note:''};
     const g=q.paper+'-'+q.sec; if(g!==last){h+=`<h2>${L[g]}</h2>`;last=g;lt=''}
     if(q.sec==='I'&&q.type!==lt){h+=`<h3>${q.type}</h3>`;lt=q.type}
     const s=state[q.id];
@@ -134,22 +132,19 @@ function render(){
   T.qs.forEach(q=>{
     const el=document.getElementById('q-'+q.id),s=state[q.id],ta=document.getElementById('note-'+q.id);
     ta.value=s.note||''; ta.oninput=()=>{s.note=ta.value;save()};
-    el.querySelectorAll('.status button').forEach(b=>b.onclick=()=>{s.status=s.status===b.dataset.s?null:b.dataset.s;el.className='q '+(s.status||'');el.querySelectorAll('.status button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.s===s.status)));counts();save()});
+    el.querySelectorAll('.status button').forEach(b=>b.onclick=()=>{s.status=(s.status===b.dataset.s&&b.dataset.s!=='right')?'right':b.dataset.s;el.className='q '+(s.status||'');el.querySelectorAll('.status button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.s===s.status)));counts();save()});
     el.querySelectorAll('.reasons button').forEach(b=>b.onclick=()=>{const r=b.textContent,i=s.reasons.indexOf(r);i<0?s.reasons.push(r):s.reasons.splice(i,1);b.setAttribute('aria-pressed',String(i<0));$('#msg').textContent='';save()});
   });
-  ['#name','#formno','#overall'].forEach(id=>$(id).oninput=save);
+  ['#name','#overall'].forEach(id=>$(id).oninput=save);
   counts();
 }
-function counts(){const v=T.qs.map(q=>state[q.id]);const n=x=>v.filter(s=>s.status===x).length;$('#counts').innerHTML=`<b>${n('wrong')}</b> wrong · <b>${n('left')}</b> left · <b>${v.filter(s=>!s.status).length}</b> not marked · <b>${photos.length}</b> photos`}
+function counts(){const v=T.qs.map(q=>state[q.id]);const n=x=>v.filter(s=>s.status===x).length;$('#counts').innerHTML=`<b>${n('wrong')}</b> wrong · <b>${n('left')}</b> left · <b>${n('right')}</b> right · <b>${photos.length}</b> photos`}
 function shrink(file){return new Promise((res,rej)=>{const img=new Image();img.onload=()=>{const k=Math.min(1,1600/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(img.src);res(c.toDataURL('image/jpeg',0.72))};img.onerror=()=>rej(new Error('Could not read '+file.name));img.src=URL.createObjectURL(file)})}
 function thumbs(){$('#thumbs').innerHTML=photos.map((p,i)=>`<div class="thumb"><img src="${p}" alt="Rough work photo ${i+1}"><button type="button" aria-label="Remove photo ${i+1}" data-i="${i}">×</button></div>`).join('');$('#thumbs').querySelectorAll('button').forEach(b=>b.onclick=()=>{photos.splice(+b.dataset.i,1);thumbs();counts()})}
 $('#photos').onchange=async e=>{const fs=[...e.target.files];e.target.value='';for(const f of fs){if(photos.length>=12)break;try{photos.push(await shrink(f))}catch(err){$('#msg').textContent=err.message}}thumbs();counts()};
 $('#send').onclick=async()=>{
-  const name=$('#name').value.trim(),form=$('#formno').value.replace(/\D/g,'');
+  const name=$('#name').value.trim(),form='';
   if(!name){$('#msg').textContent='Write your name.';$('#name').focus();return}
-  if(form.length<8){$('#msg').textContent='Write your form number.';$('#formno').focus();return}
-  const un=T.qs.filter(q=>!state[q.id].status);
-  if(un.length){$('#msg').textContent='Mark every question. Still open: '+un.slice(0,6).map(label).join(', ')+(un.length>6?' …':'');document.getElementById('q-'+un[0].id).scrollIntoView({block:'center'});return}
   const miss=T.qs.filter(q=>['wrong','left'].includes(state[q.id].status)&&!state[q.id].reasons.length);
   if(miss.length){$('#msg').textContent='Pick a reason for '+miss.map(label).join(', ')+'.';document.getElementById('q-'+miss[0].id).scrollIntoView({block:'center'});return}
   if(!photos.length&&!window.__nophotoOk){$('#msg').textContent='Add photos of your rough work, or press Send again to send without them.';window.__nophotoOk=true;return}
@@ -163,7 +158,7 @@ $('#send').onclick=async()=>{
     try{localStorage.removeItem(KEY)}catch(e){}
   }catch(err){$('#msg').textContent='Could not send ('+err.message+'). Check your internet and press Send again.';b.disabled=false}
 };
-load();render();
+load();{const n=P.get('n');if(n)$('#name').value=n;}render();
 </script>
 </body>
 </html>
