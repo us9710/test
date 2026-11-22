@@ -20,6 +20,7 @@ Student test pages for online interactions.
 | TOAS O65 (JEE Advanced pattern, 18 Qs) | https://us9710.github.io/test/O65/ |
 | TOAS O66 (JEE Advanced pattern, 18 Qs) | https://us9710.github.io/test/O66/ |
 | TOAS O67 (JEE Advanced pattern, 18 Qs) | https://us9710.github.io/test/O67/ |
+| Mistake log, TOAS Pre-Score 15 Nov 2026 | https://us9710.github.io/test/ML/?t=2026-11-15 |
 
 - `index.html` (also in `1/`–`4/`): the test page; the folder number picks the test.
 - `5/index.html`, `6/index.html`: the adaptive tests (same page). 40 minutes, 3 stages of 5 going Easy, then Medium, then Tough; the questions of each stage come from the Apps Script and depend on the stage before, so none of them are in this repo.
@@ -27,3 +28,5 @@ Student test pages for online interactions.
 - `tests.json`: questions only. Answer keys and grading live in a private Google Apps Script; scores go to a private Google Sheet.
 - To change questions, rebuild with the private project in OneDrive `Class-Work/Interaction/LiveTests` and push the new `tests.json`.
 - `O58/` … `O67/index.html`: TOAS revision tests in the JEE Advanced pattern (6 single, 6 multiple, 6 numerical; +4/−1, +4/+1 partial/−1, +3/0; max 66). The questions and keys come from the Apps Script, so none of them are in this repo. A test opens only when it is ticked in the Sheet's "TOAS Control" tab. Teacher preview: add `?preview=<key>`.
+
+- `ML/index.html`: test-cycle mistake log. `?t=<test id>` picks the test (question numbers and topics only, no question text or answers). Submissions go to the Apps Script (`mode: 'mistakes'`): tab "Mistake Log" in the Sheet, photos in Drive folder "TOAS Mistake Log Photos/<test id>". Teacher preview: add `&preview` (nothing sent).
